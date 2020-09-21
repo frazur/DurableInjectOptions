@@ -1,0 +1,9 @@
+{
+    "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "MyConfig:Timeout": 10,
+    "MyConfig:Endpoint": "http://10.0.0.1"
+  }
+}
