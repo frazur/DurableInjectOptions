@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
@@ -12,32 +14,33 @@ namespace DurableInjectOptions
 {
     public class MyOrchestratorFunction
     {
-        private MyConfig conf;
+        private readonly MyConfig Conf;
 
         public MyOrchestratorFunction(IOptions<MyConfig> conf)
         {
-            this.conf = conf.Value;
+            this.Conf = conf.Value;
         }
 
         [FunctionName("MyOrchestratorFunction")]
         public async Task<List<string>> RunOrchestrator(
             [OrchestrationTrigger] IDurableOrchestrationContext context)
         {
-            var outputs = new List<string>();
-            
-            // Replace "hello" with the name of your Durable Activity Function.
-            outputs.Add(await context.CallActivityAsync<string>("MyOrchestratorFunction_Hello", conf.Timeout));
-            outputs.Add(await context.CallActivityAsync<string>("MyOrchestratorFunction_Hello", conf.Endpoint));
+            await context.CreateTimer(context.CurrentUtcDateTime + new TimeSpan(0, 0, Conf.Timeout), CancellationToken.None);
 
-            // returns ["Hello Tokyo!", "Hello Seattle!", "Hello London!"]
+            var outputs = new List<string>
+            {
+                await context.CallActivityAsync<string>("MyOrchestratorFunction_PrintThis", Conf.Endpoint)
+            };
+
             return outputs;
         }
 
-        [FunctionName("MyOrchestratorFunction_Hello")]
-        public static string SayHello([ActivityTrigger] string name, ILogger log)
+        [FunctionName("MyOrchestratorFunction_PrintThis")]
+        public static string PrintThis([ActivityTrigger] string s, ILogger log)
         {
-            log.LogInformation($"Saying hello to {name}.");
-            return $"Hello {name}!";
+            log.LogInformation($"Printing --> {s}.");
+
+            return s;
         }
 
         [FunctionName("MyOrchestratorFunction_HttpStart")]
