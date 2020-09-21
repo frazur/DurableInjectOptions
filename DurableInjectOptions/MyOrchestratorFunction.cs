@@ -14,7 +14,7 @@ namespace DurableInjectOptions
 {
     public class MyOrchestratorFunction
     {
-        private readonly MyConfig Conf;
+        private readonly IMyConfig Conf;
 
         public MyOrchestratorFunction(IOptions<MyConfig> conf)
         {
